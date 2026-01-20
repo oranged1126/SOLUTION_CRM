@@ -1,0 +1,8 @@
+{
+  "version": 2,
+  "rewrites": [
+    { "source": "/api/projects/:id", "destination": "/api/projects/[id]" },
+    { "source": "/api/employees/:id/projects", "destination": "/api/employees/[id]/projects" },
+    { "source": "/api/(.*)", "destination": "/api/$1" }
+  ]
+}

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>POUR 솔루션 CRM</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- 메인 컨테이너 - 슬라이드 화면 전환용 -->
+        <div class="screen-container">
+            <!-- 홈 화면 -->
+            <div class="screen active" id="home-screen">
+                <!-- 헤더 -->
+                <header class="header">
+                    <h1>POUR 솔루션</h1>
+                </header>
+
+                <!-- 신규 견적 버튼 영역 -->
+                <section class="new-projects-section">
+                    <h2>신규 견적 문의</h2>
+                    <div class="new-projects-grid" id="new-projects-grid">
+                        <!-- 동적으로 버튼 추가됨 -->
+                    </div>
+                </section>
+
+                <!-- 담당자 영역 -->
+                <section class="employees-section">
+                    <div class="employees-header">
+                        <h2>담당자</h2>
+                        <div class="nav-arrows">
+                            <button class="nav-arrow" id="prev-employees" disabled>&#9664;</button>
+                            <button class="nav-arrow" id="next-employees">&#9654;</button>
+                        </div>
+                    </div>
+                    <div class="employees-container" id="employees-container">
+                        <!-- 담당자 카드들이 여기에 추가됨 -->
+                    </div>
+                    <div class="page-indicator" id="page-indicator"></div>
+                </section>
+
+                <!-- 완료/중단 내역 -->
+                <section class="history-section" id="history-section">
+                    <div class="history-tabs">
+                        <button class="history-tab completed active" id="tab-completed" data-status="completed">
+                            완료 <span class="history-count" id="completed-count">0</span>
+                        </button>
+                        <button class="history-tab cancelled" id="tab-cancelled" data-status="cancelled">
+                            중단 <span class="history-count" id="cancelled-count">0</span>
+                        </button>
+                    </div>
+                    <div class="history-list" id="history-list">
+                        <!-- 완료/중단된 항목들이 여기에 추가됨 -->
+                    </div>
+                </section>
+            </div>
+
+            <!-- 업무 체크리스트 화면 -->
+            <div class="screen" id="task-screen">
+                <header class="header with-back">
+                    <button class="back-btn" id="task-back-btn">&#9664;</button>
+                    <h1 id="task-title">현장명 / 공사유형</h1>
+                </header>
+
+                <section class="task-checklist">
+                    <div class="task-item" data-task="1">
+                        <span class="task-text">POUR공법 기술 서비스 제공</span>
+                        <input type="checkbox" class="task-checkbox" data-task-id="1">
+                    </div>
+                    <div class="task-item" data-task="2">
+                        <span class="task-text">AI 기반 하자 진단</span>
+                        <input type="checkbox" class="task-checkbox" data-task-id="2">
+                    </div>
+                    <div class="task-item" data-task="3">
+                        <span class="task-text">교육 및 가이드 제공</span>
+                        <input type="checkbox" class="task-checkbox" data-task-id="3">
+                    </div>
+                    <div class="task-item" data-task="4">
+                        <span class="task-text">설계도서 / 견적서 제공</span>
+                        <input type="checkbox" class="task-checkbox" data-task-id="4">
+                    </div>
+                    <div class="task-item" data-task="5">
+                        <span class="task-text">기술연구원 관리 감독</span>
+                        <input type="checkbox" class="task-checkbox" data-task-id="5">
+                    </div>
+                    <div class="task-item" data-task="6">
+                        <span class="task-text">전-중-후 PT 진행</span>
+                        <input type="checkbox" class="task-checkbox" data-task-id="6">
+                    </div>
+                    <div class="task-item" data-task="7">
+                        <span class="task-text">행정 업무 지원</span>
+                        <input type="checkbox" class="task-checkbox" data-task-id="7">
+                    </div>
+                    <div class="task-item" data-task="8">
+                        <span class="task-text">현장 설명회 진행</span>
+                        <input type="checkbox" class="task-checkbox" data-task-id="8">
+                    </div>
+                </section>
+
+                <div class="task-actions">
+                    <button class="btn-complete" id="btn-complete">완료</button>
+                    <button class="btn-cancel" id="btn-cancel">중단</button>
+                </div>
+            </div>
+
+            <!-- 상세 업무 화면 (사진/PT 업로드) -->
+            <div class="screen" id="detail-screen">
+                <header class="header with-back">
+                    <button class="back-btn" id="detail-back-btn">&#9664;</button>
+                    <h1 id="detail-title">현장명</h1>
+                </header>
+
+                <section class="detail-content">
+                    <h3 id="detail-task-name">업무명</h3>
+
+                    <div class="photo-upload-section">
+                        <h4>사진 등록</h4>
+                        <div class="photo-grid">
+                            <div class="photo-box" data-photo="1">
+                                <input type="file" accept="image/*" class="photo-input" id="photo-1" capture="environment">
+                                <label for="photo-1" class="photo-label">
+                                    <svg class="camera-icon" viewBox="0 0 24 24">
+                                        <path d="M12 15.2c1.77 0 3.2-1.43 3.2-3.2S13.77 8.8 12 8.8 8.8 10.23 8.8 12s1.43 3.2 3.2 3.2zm9-9.6h-3.17L16 4H8L6.17 5.6H3c-.88 0-1.6.72-1.6 1.6v11.2c0 .88.72 1.6 1.6 1.6h18c.88 0 1.6-.72 1.6-1.6V7.2c0-.88-.72-1.6-1.6-1.6z"/>
+                                    </svg>
+                                </label>
+                                <div class="photo-preview"></div>
+                            </div>
+                            <div class="photo-box" data-photo="2">
+                                <input type="file" accept="image/*" class="photo-input" id="photo-2" capture="environment">
+                                <label for="photo-2" class="photo-label">
+                                    <svg class="camera-icon" viewBox="0 0 24 24">
+                                        <path d="M12 15.2c1.77 0 3.2-1.43 3.2-3.2S13.77 8.8 12 8.8 8.8 10.23 8.8 12s1.43 3.2 3.2 3.2zm9-9.6h-3.17L16 4H8L6.17 5.6H3c-.88 0-1.6.72-1.6 1.6v11.2c0 .88.72 1.6 1.6 1.6h18c.88 0 1.6-.72 1.6-1.6V7.2c0-.88-.72-1.6-1.6-1.6z"/>
+                                    </svg>
+                                </label>
+                                <div class="photo-preview"></div>
+                            </div>
+                            <div class="photo-box" data-photo="3">
+                                <input type="file" accept="image/*" class="photo-input" id="photo-3" capture="environment">
+                                <label for="photo-3" class="photo-label">
+                                    <svg class="camera-icon" viewBox="0 0 24 24">
+                                        <path d="M12 15.2c1.77 0 3.2-1.43 3.2-3.2S13.77 8.8 12 8.8 8.8 10.23 8.8 12s1.43 3.2 3.2 3.2zm9-9.6h-3.17L16 4H8L6.17 5.6H3c-.88 0-1.6.72-1.6 1.6v11.2c0 .88.72 1.6 1.6 1.6h18c.88 0 1.6-.72 1.6-1.6V7.2c0-.88-.72-1.6-1.6-1.6z"/>
+                                    </svg>
+                                </label>
+                                <div class="photo-preview"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-upload-section">
+                        <input type="file" accept=".ppt,.pptx,.pdf" id="pt-file" class="pt-input">
+                        <label for="pt-file" class="pt-upload-btn">PT 자료 업로드</label>
+                        <span class="pt-filename" id="pt-filename"></span>
+                    </div>
+
+                    <div class="memo-section">
+                        <h4>메모</h4>
+                        <textarea id="detail-memo" placeholder="메모를 입력하세요..."></textarea>
+                    </div>
+
+                    <button class="btn-save" id="btn-save-detail">저장</button>
+                </section>
+            </div>
+
+            <!-- 일정 화면 -->
+            <div class="screen" id="calendar-screen">
+                <header class="header">
+                    <h1>일정</h1>
+                </header>
+                <section class="calendar-section">
+                    <div class="calendar-header">
+                        <button class="calendar-nav" id="prev-month">&#9664;</button>
+                        <h3 id="calendar-month">2026년 1월</h3>
+                        <button class="calendar-nav" id="next-month">&#9654;</button>
+                    </div>
+                    <div class="calendar-grid">
+                        <div class="calendar-weekdays">
+                            <span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span>
+                        </div>
+                        <div class="calendar-days" id="calendar-days">
+                            <!-- 동적으로 날짜 추가 -->
+                        </div>
+                    </div>
+                    <div class="schedule-list" id="schedule-list">
+                        <h4>오늘의 일정</h4>
+                        <div class="schedule-items" id="schedule-items">
+                            <!-- 일정 목록 -->
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- 자료 화면 -->
+            <div class="screen" id="files-screen">
+                <header class="header">
+                    <h1>자료</h1>
+                </header>
+                <section class="files-section">
+                    <div class="folder-list" id="folder-list">
+                        <!-- 폴더 목록 -->
+                    </div>
+                    <div class="gallery-view" id="gallery-view" style="display:none;">
+                        <button class="back-to-folders" id="back-to-folders">&#9664; 폴더 목록</button>
+                        <h3 id="current-folder-name"></h3>
+                        <div class="gallery-grid" id="gallery-grid">
+                            <!-- 이미지 갤러리 -->
+                        </div>
+                        <button class="btn-add-photo" id="btn-add-gallery-photo">+ 사진 추가</button>
+                        <input type="file" accept="image/*" id="gallery-photo-input" style="display:none;" multiple>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <!-- 하단 네비게이션 -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" data-screen="home-screen">
+                <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                <span>홈</span>
+            </button>
+            <button class="nav-item" data-screen="calendar-screen">
+                <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg>
+                <span>일정</span>
+            </button>
+            <button class="nav-item" data-screen="files-screen">
+                <svg viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>
+                <span>자료</span>
+            </button>
+        </nav>
+
+        <!-- 견적 상세 팝업 -->
+        <div class="popup-overlay" id="project-popup" style="display:none;">
+            <div class="popup-content project-detail-popup">
+                <button class="popup-close" id="popup-close">&times;</button>
+                <h2 id="popup-title">견적문의 알림</h2>
+                <div class="popup-body" id="popup-body">
+                    <!-- 견적 상세 내용 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 중단 사유 팝업 -->
+        <div class="popup-overlay" id="cancel-popup" style="display:none;">
+            <div class="popup-content cancel-popup">
+                <h2>중단 사유</h2>
+                <textarea id="cancel-reason" placeholder="중단 사유를 입력하세요 (필수)"></textarea>
+                <div class="popup-actions">
+                    <button class="btn-confirm" id="confirm-cancel">확인</button>
+                    <button class="btn-close-popup" id="close-cancel-popup">취소</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 사진 선택 팝업 -->
+        <div class="popup-overlay" id="photo-option-popup" style="display:none;">
+            <div class="popup-content photo-option-popup">
+                <h2>사진 선택</h2>
+                <button class="photo-option-btn" id="take-photo">사진 촬영</button>
+                <button class="photo-option-btn" id="choose-gallery">갤러리에서 가져오기</button>
+                <button class="btn-close-popup" id="close-photo-popup">취소</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/dragdrop.js"></script>
+    <script src="js/calendar.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
