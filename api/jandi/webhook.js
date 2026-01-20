@@ -133,6 +133,18 @@ module.exports = async (req, res) => {
         // 메시지 파싱
         const projectData = parseJandiMessage(messageText);
 
+        // 디버그: 원본 데이터 저장
+        const debugInfo = {
+            bodyType: typeof req.body,
+            hasData: !!jandiData.data,
+            hasText: !!jandiData.text,
+            dataFirst100: (jandiData.data || '').substring(0, 100),
+            textFirst100: (jandiData.text || '').substring(0, 100),
+            sections: projectData._debugSections,
+            parsedSiteName: projectData.siteName,
+            parsedBuildingType: projectData.buildingType
+        };
+
         // Supabase에 저장
         const { data, error } = await supabase
             .from('projects')
@@ -147,7 +159,7 @@ module.exports = async (req, res) => {
                 contact_name: projectData.contactName,
                 source: projectData.source,
                 inquiry: projectData.inquiry,
-                memo: projectData.memo,
+                memo: debugInfo,  // 임시로 디버그 정보 저장
                 status: 'new',
                 assigned_to: null,
                 checklist: {},
