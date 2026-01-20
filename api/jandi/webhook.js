@@ -22,6 +22,11 @@ function parseJandiMessage(text) {
         return match ? match[1] : str.trim();
     };
 
+    // 필드 값 추출 헬퍼 함수
+    const extractValue = (line, pattern) => {
+        return line.replace(pattern, '').trim();
+    };
+
     // 내부 메모 섹션 분리
     let mainText = text;
     let memoText = '';
@@ -36,11 +41,8 @@ function parseJandiMessage(text) {
         memoText = parts[1] || '';
     }
 
-    // ■ 기준으로 섹션 분리 (여러 가능한 문자 처리)
+    // ■ 기준으로 섹션 분리
     const sections = mainText.split(/■|◾|▪|●/).map(s => s.trim()).filter(s => s);
-
-    // 디버그: 섹션 목록 저장
-    data._debugSections = sections.slice(0, 5).map(s => s.substring(0, 50));
 
     for (const section of sections) {
         // 각 섹션의 첫 번째 줄과 나머지 분리
@@ -48,46 +50,55 @@ function parseJandiMessage(text) {
         const firstLine = lines[0].trim();
         const restLines = lines.slice(1).map(l => l.trim()).filter(l => l).join('\n');
 
-        if (firstLine.startsWith('현장 :') || firstLine.startsWith('현장:')) {
-            data.siteName = firstLine.replace(/현장\s*:\s*/, '').trim();
-        } else if (firstLine.startsWith('건물유형 :') || firstLine.startsWith('건물유형:')) {
-            data.buildingType = firstLine.replace(/건물유형\s*:\s*/, '').trim();
-        } else if (firstLine.startsWith('건물주소 :') || firstLine.startsWith('건물주소:') || firstLine.startsWith('주소 :') || firstLine.startsWith('주소:')) {
-            data.address = firstLine.replace(/건물주소\s*:\s*|주소\s*:\s*/, '').trim();
-        } else if (firstLine.startsWith('단지개요 :') || firstLine.startsWith('단지개요:')) {
-            data.units = firstLine.replace(/단지개요\s*:\s*/, '').trim();
-        } else if (firstLine.startsWith('고객유형 :') || firstLine.startsWith('고객유형:')) {
-            data.customerType = firstLine.replace(/고객유형\s*:\s*/, '').trim();
-        } else if (firstLine.startsWith('연락처(관리사무소)') || firstLine.startsWith('연락처 :') || firstLine.startsWith('연락처:')) {
-            const phoneStr = firstLine.replace(/연락처\([^)]*\)\s*:\s*|연락처\s*:\s*/, '').trim();
+        // 정규식으로 필드 매칭 (공백 변형 처리)
+        if (/^현장\s*[:：]\s*/i.test(firstLine)) {
+            data.siteName = extractValue(firstLine, /^현장\s*[:：]\s*/i);
+        } else if (/^건물유형\s*[:：]\s*/i.test(firstLine)) {
+            data.buildingType = extractValue(firstLine, /^건물유형\s*[:：]\s*/i);
+        } else if (/^(건물)?주소\s*[:：]\s*/i.test(firstLine)) {
+            data.address = extractValue(firstLine, /^(건물)?주소\s*[:：]\s*/i);
+        } else if (/^단지개요\s*[:：]\s*/i.test(firstLine)) {
+            data.units = extractValue(firstLine, /^단지개요\s*[:：]\s*/i);
+        } else if (/^고객유형\s*[:：]\s*/i.test(firstLine)) {
+            data.customerType = extractValue(firstLine, /^고객유형\s*[:：]\s*/i);
+        } else if (/^연락처\s*\([^)]*\)\s*[:：]\s*/i.test(firstLine)) {
+            // 연락처(관리사무소) 형식
+            const phoneStr = extractValue(firstLine, /^연락처\s*\([^)]*\)\s*[:：]\s*/i);
             data.contact = extractPhone(phoneStr);
-        } else if (firstLine.startsWith('연락처 / 성함') || firstLine.startsWith('연락처/성함')) {
-            const contactPart = firstLine.replace(/연락처\s*\/\s*성함\s*:\s*/, '').trim();
-            const parts = contactPart.split('/');
+        } else if (/^연락처\s*[/／]\s*성함\s*[:：]\s*/i.test(firstLine)) {
+            // 연락처 / 성함 형식
+            const contactPart = extractValue(firstLine, /^연락처\s*[/／]\s*성함\s*[:：]\s*/i);
+            const parts = contactPart.split(/[/／]/);
             if (parts[0]) data.contact = extractPhone(parts[0].trim());
             if (parts[1]) data.contactName = parts[1].trim();
-        } else if (firstLine.startsWith('담당자 :') || firstLine.startsWith('담당자:')) {
-            data.contactName = firstLine.replace(/담당자\s*:\s*/, '').trim();
-        } else if (firstLine.startsWith('유입경로 :') || firstLine.startsWith('유입경로:')) {
-            data.source = firstLine.replace(/유입경로\s*:\s*/, '').trim();
-        } else if (firstLine.startsWith('문의내용 :') || firstLine.startsWith('문의내용:')) {
+        } else if (/^연락처\s*[:：]\s*/i.test(firstLine)) {
+            const phoneStr = extractValue(firstLine, /^연락처\s*[:：]\s*/i);
+            data.contact = extractPhone(phoneStr);
+        } else if (/^담당자\s*[:：]\s*/i.test(firstLine)) {
+            data.contactName = extractValue(firstLine, /^담당자\s*[:：]\s*/i);
+        } else if (/^유입경로\s*[:：]\s*/i.test(firstLine)) {
+            data.source = extractValue(firstLine, /^유입경로\s*[:：]\s*/i);
+        } else if (/^문의내용\s*[:：]\s*/i.test(firstLine)) {
             // 문의내용은 첫 줄 + 나머지 줄 모두 포함
-            const firstContent = firstLine.replace(/문의내용\s*:\s*/, '').trim();
+            const firstContent = extractValue(firstLine, /^문의내용\s*[:：]\s*/i);
             data.inquiry = firstContent ? (firstContent + '\n' + restLines).trim() : restLines.trim();
         }
     }
 
     // 내부 메모 파싱
     if (memoText) {
-        const memoSegments = memoText.split(/- |\n/).map(s => s.trim()).filter(s => s);
-        for (const seg of memoSegments) {
-            if (seg.startsWith('공사유형 :') || seg.startsWith('공사유형:')) {
-                data.constructionType = seg.replace(/공사유형\s*:\s*/, '').trim();
+        const memoLines = memoText.split('\n').map(s => s.trim()).filter(s => s);
+        for (const line of memoLines) {
+            // 앞의 '- ' 제거
+            const cleanLine = line.replace(/^-\s*/, '');
+
+            if (/^공사\s*유형\s*[:：]\s*/i.test(cleanLine)) {
+                data.constructionType = extractValue(cleanLine, /^공사\s*유형\s*[:：]\s*/i);
                 data.memo.constructionType = data.constructionType;
-            } else if (seg.startsWith('공사 예정시기 :') || seg.startsWith('공사 예정시기:') || seg.startsWith('예정시기 :') || seg.startsWith('예정시기:')) {
-                data.memo.expectedDate = seg.replace(/공사 예정시기\s*:\s*|예정시기\s*:\s*/, '').trim();
-            } else if (seg.startsWith('특이사항 :') || seg.startsWith('특이사항:')) {
-                data.memo.note = seg.replace(/특이사항\s*:\s*/, '').trim();
+            } else if (/^(공사\s*)?예정\s*시기\s*[:：]\s*/i.test(cleanLine)) {
+                data.memo.expectedDate = extractValue(cleanLine, /^(공사\s*)?예정\s*시기\s*[:：]\s*/i);
+            } else if (/^특이사항\s*[:：]\s*/i.test(cleanLine)) {
+                data.memo.note = extractValue(cleanLine, /^특이사항\s*[:：]\s*/i);
             }
         }
     }
@@ -133,18 +144,6 @@ module.exports = async (req, res) => {
         // 메시지 파싱
         const projectData = parseJandiMessage(messageText);
 
-        // 디버그: 원본 데이터 저장
-        const debugInfo = {
-            bodyType: typeof req.body,
-            hasData: !!jandiData.data,
-            hasText: !!jandiData.text,
-            dataFirst100: (jandiData.data || '').substring(0, 100),
-            textFirst100: (jandiData.text || '').substring(0, 100),
-            sections: projectData._debugSections,
-            parsedSiteName: projectData.siteName,
-            parsedBuildingType: projectData.buildingType
-        };
-
         // Supabase에 저장
         const { data, error } = await supabase
             .from('projects')
@@ -159,7 +158,7 @@ module.exports = async (req, res) => {
                 contact_name: projectData.contactName,
                 source: projectData.source,
                 inquiry: projectData.inquiry,
-                memo: debugInfo,  // 임시로 디버그 정보 저장
+                memo: projectData.memo,
                 status: 'new',
                 assigned_to: null,
                 checklist: {},
@@ -179,15 +178,7 @@ module.exports = async (req, res) => {
             success: true,
             message: 'Project created',
             projectId: data[0].id,
-            debug: {
-                bodyType: typeof req.body,
-                receivedDataField: jandiData.data ? 'YES' : 'NO',
-                receivedTextField: jandiData.text ? 'YES' : 'NO',
-                usedText: messageText.substring(0, 200),
-                firstChars: messageText.substring(0, 30).split('').map(c => c.charCodeAt(0)),
-                sections: projectData._debugSections,
-                parsed: projectData
-            }
+            parsed: projectData
         });
 
     } catch (error) {
