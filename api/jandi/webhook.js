@@ -154,7 +154,13 @@ module.exports = async (req, res) => {
         return res.status(200).json({
             success: true,
             message: 'Project created',
-            projectId: data[0].id
+            projectId: data[0].id,
+            debug: {
+                receivedDataField: jandiData.data ? 'YES' : 'NO',
+                receivedTextField: jandiData.text ? 'YES' : 'NO',
+                usedText: messageText.substring(0, 200),
+                parsed: projectData
+            }
         });
 
     } catch (error) {
