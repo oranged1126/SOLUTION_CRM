@@ -79,9 +79,16 @@ module.exports = async (req, res) => {
     try {
         const jandiData = req.body;
 
-        // 잔디 웹훅 데이터 구조
-        // { token, teamName, roomName, writerName, text, ... }
-        const messageText = jandiData.text || jandiData.data?.content || '';
+        // 디버깅: 잔디가 보내는 실제 데이터 확인
+        console.log('=== JANDI WEBHOOK RECEIVED ===');
+        console.log('Headers:', JSON.stringify(req.headers));
+        console.log('Body:', JSON.stringify(jandiData));
+        console.log('Body type:', typeof jandiData);
+        console.log('==============================');
+
+        // 잔디 웹훅 데이터 구조 (여러 형식 지원)
+        // Outgoing Webhook: { token, teamName, roomName, writerName, text, keyword, ... }
+        const messageText = jandiData.text || jandiData.data?.content || jandiData.content || '';
 
         if (!messageText) {
             return res.status(400).json({ error: 'No message text found' });
