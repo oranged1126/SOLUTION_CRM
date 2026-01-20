@@ -36,34 +36,41 @@ function parseJandiMessage(text) {
         memoText = parts[1] || '';
     }
 
-    // ■ 또는 줄바꿈으로 분리
-    const segments = mainText.split(/■|\n/).map(s => s.trim()).filter(s => s);
+    // ■ 기준으로 섹션 분리
+    const sections = mainText.split('■').map(s => s.trim()).filter(s => s);
 
-    for (const segment of segments) {
-        if (segment.startsWith('현장 :') || segment.startsWith('현장:')) {
-            data.siteName = segment.replace(/현장\s*:\s*/, '').trim();
-        } else if (segment.startsWith('건물유형 :') || segment.startsWith('건물유형:')) {
-            data.buildingType = segment.replace(/건물유형\s*:\s*/, '').trim();
-        } else if (segment.startsWith('건물주소 :') || segment.startsWith('건물주소:') || segment.startsWith('주소 :') || segment.startsWith('주소:')) {
-            data.address = segment.replace(/건물주소\s*:\s*|주소\s*:\s*/, '').trim();
-        } else if (segment.startsWith('단지개요 :') || segment.startsWith('단지개요:')) {
-            data.units = segment.replace(/단지개요\s*:\s*/, '').trim();
-        } else if (segment.startsWith('고객유형 :') || segment.startsWith('고객유형:')) {
-            data.customerType = segment.replace(/고객유형\s*:\s*/, '').trim();
-        } else if (segment.startsWith('연락처(관리사무소)') || segment.startsWith('연락처 :') || segment.startsWith('연락처:')) {
-            const phoneStr = segment.replace(/연락처\([^)]*\)\s*:\s*|연락처\s*:\s*/, '').trim();
+    for (const section of sections) {
+        // 각 섹션의 첫 번째 줄과 나머지 분리
+        const lines = section.split('\n');
+        const firstLine = lines[0].trim();
+        const restLines = lines.slice(1).map(l => l.trim()).filter(l => l).join('\n');
+
+        if (firstLine.startsWith('현장 :') || firstLine.startsWith('현장:')) {
+            data.siteName = firstLine.replace(/현장\s*:\s*/, '').trim();
+        } else if (firstLine.startsWith('건물유형 :') || firstLine.startsWith('건물유형:')) {
+            data.buildingType = firstLine.replace(/건물유형\s*:\s*/, '').trim();
+        } else if (firstLine.startsWith('건물주소 :') || firstLine.startsWith('건물주소:') || firstLine.startsWith('주소 :') || firstLine.startsWith('주소:')) {
+            data.address = firstLine.replace(/건물주소\s*:\s*|주소\s*:\s*/, '').trim();
+        } else if (firstLine.startsWith('단지개요 :') || firstLine.startsWith('단지개요:')) {
+            data.units = firstLine.replace(/단지개요\s*:\s*/, '').trim();
+        } else if (firstLine.startsWith('고객유형 :') || firstLine.startsWith('고객유형:')) {
+            data.customerType = firstLine.replace(/고객유형\s*:\s*/, '').trim();
+        } else if (firstLine.startsWith('연락처(관리사무소)') || firstLine.startsWith('연락처 :') || firstLine.startsWith('연락처:')) {
+            const phoneStr = firstLine.replace(/연락처\([^)]*\)\s*:\s*|연락처\s*:\s*/, '').trim();
             data.contact = extractPhone(phoneStr);
-        } else if (segment.startsWith('연락처 / 성함') || segment.startsWith('연락처/성함')) {
-            const contactPart = segment.replace(/연락처\s*\/\s*성함\s*:\s*/, '').trim();
+        } else if (firstLine.startsWith('연락처 / 성함') || firstLine.startsWith('연락처/성함')) {
+            const contactPart = firstLine.replace(/연락처\s*\/\s*성함\s*:\s*/, '').trim();
             const parts = contactPart.split('/');
             if (parts[0]) data.contact = extractPhone(parts[0].trim());
             if (parts[1]) data.contactName = parts[1].trim();
-        } else if (segment.startsWith('담당자 :') || segment.startsWith('담당자:')) {
-            data.contactName = segment.replace(/담당자\s*:\s*/, '').trim();
-        } else if (segment.startsWith('유입경로 :') || segment.startsWith('유입경로:')) {
-            data.source = segment.replace(/유입경로\s*:\s*/, '').trim();
-        } else if (segment.startsWith('문의내용 :') || segment.startsWith('문의내용:')) {
-            data.inquiry = segment.replace(/문의내용\s*:\s*/, '').trim();
+        } else if (firstLine.startsWith('담당자 :') || firstLine.startsWith('담당자:')) {
+            data.contactName = firstLine.replace(/담당자\s*:\s*/, '').trim();
+        } else if (firstLine.startsWith('유입경로 :') || firstLine.startsWith('유입경로:')) {
+            data.source = firstLine.replace(/유입경로\s*:\s*/, '').trim();
+        } else if (firstLine.startsWith('문의내용 :') || firstLine.startsWith('문의내용:')) {
+            // 문의내용은 첫 줄 + 나머지 줄 모두 포함
+            const firstContent = firstLine.replace(/문의내용\s*:\s*/, '').trim();
+            data.inquiry = firstContent ? (firstContent + '\n' + restLines).trim() : restLines.trim();
         }
     }
 
