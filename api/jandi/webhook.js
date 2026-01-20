@@ -36,8 +36,11 @@ function parseJandiMessage(text) {
         memoText = parts[1] || '';
     }
 
-    // ■ 기준으로 섹션 분리
-    const sections = mainText.split('■').map(s => s.trim()).filter(s => s);
+    // ■ 기준으로 섹션 분리 (여러 가능한 문자 처리)
+    const sections = mainText.split(/■|◾|▪|●/).map(s => s.trim()).filter(s => s);
+
+    // 디버그: 섹션 목록 저장
+    data._debugSections = sections.slice(0, 5).map(s => s.substring(0, 50));
 
     for (const section of sections) {
         // 각 섹션의 첫 번째 줄과 나머지 분리
@@ -169,6 +172,8 @@ module.exports = async (req, res) => {
                 receivedDataField: jandiData.data ? 'YES' : 'NO',
                 receivedTextField: jandiData.text ? 'YES' : 'NO',
                 usedText: messageText.substring(0, 200),
+                firstChars: messageText.substring(0, 30).split('').map(c => c.charCodeAt(0)),
+                sections: projectData._debugSections,
                 parsed: projectData
             }
         });
