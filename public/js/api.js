@@ -33,7 +33,15 @@ const API = {
         async getById(id) {
             try {
                 const response = await fetch(`${API_BASE_URL}/projects?id=${id}`);
+                if (!response.ok) {
+                    console.error('프로젝트 조회 실패:', response.status);
+                    return null;
+                }
                 const data = await response.json();
+                if (data.error) {
+                    console.error('프로젝트 조회 실패:', data.error);
+                    return null;
+                }
                 return this.transformProject(data);
             } catch (error) {
                 console.error('프로젝트 조회 실패:', error);
