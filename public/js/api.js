@@ -32,7 +32,7 @@ const API = {
         // 특정 프로젝트 가져오기
         async getById(id) {
             try {
-                const response = await fetch(`${API_BASE_URL}/projects/${id}`);
+                const response = await fetch(`${API_BASE_URL}/projects?id=${id}`);
                 const data = await response.json();
                 return this.transformProject(data);
             } catch (error) {
@@ -44,7 +44,7 @@ const API = {
         // 담당자 배정
         async assign(projectId, employeeId) {
             try {
-                const response = await fetch(`${API_BASE_URL}/projects/${projectId}`, {
+                const response = await fetch(`${API_BASE_URL}/projects?id=${projectId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ assignedTo: employeeId })
@@ -60,7 +60,7 @@ const API = {
         // 체크리스트 업데이트
         async updateChecklist(projectId, checklist) {
             try {
-                const response = await fetch(`${API_BASE_URL}/projects/${projectId}`, {
+                const response = await fetch(`${API_BASE_URL}/projects?id=${projectId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ checklist })
@@ -76,7 +76,7 @@ const API = {
         // 프로젝트 완료
         async complete(projectId, checklist) {
             try {
-                const response = await fetch(`${API_BASE_URL}/projects/${projectId}`, {
+                const response = await fetch(`${API_BASE_URL}/projects?id=${projectId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ status: 'completed', checklist })
@@ -92,7 +92,7 @@ const API = {
         // 프로젝트 중단
         async cancel(projectId, reason) {
             try {
-                const response = await fetch(`${API_BASE_URL}/projects/${projectId}`, {
+                const response = await fetch(`${API_BASE_URL}/projects?id=${projectId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ status: 'cancelled', reason })
@@ -113,7 +113,7 @@ const API = {
                 const taskDetails = project?.taskDetails || {};
                 taskDetails[taskId] = detail;
 
-                const response = await fetch(`${API_BASE_URL}/projects/${projectId}`, {
+                const response = await fetch(`${API_BASE_URL}/projects?id=${projectId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ taskDetails })
