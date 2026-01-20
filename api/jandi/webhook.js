@@ -107,7 +107,16 @@ module.exports = async (req, res) => {
     }
 
     try {
-        const jandiData = req.body;
+        let jandiData = req.body;
+
+        // req.body가 문자열이면 JSON 파싱 시도
+        if (typeof jandiData === 'string') {
+            try {
+                jandiData = JSON.parse(jandiData);
+            } catch (e) {
+                // 파싱 실패하면 그대로 사용
+            }
+        }
 
         // 잔디 Outgoing Webhook 형식
         // text: 전체 메시지 (/현장 포함)
@@ -156,6 +165,7 @@ module.exports = async (req, res) => {
             message: 'Project created',
             projectId: data[0].id,
             debug: {
+                bodyType: typeof req.body,
                 receivedDataField: jandiData.data ? 'YES' : 'NO',
                 receivedTextField: jandiData.text ? 'YES' : 'NO',
                 usedText: messageText.substring(0, 200),
